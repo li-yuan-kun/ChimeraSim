@@ -1,0 +1,9 @@
+{
+  "ops": [
+    {"op_id":"op0","op_type":"MATMUL","ops":120000,"in_bytes":4096,"w_bytes":8192,"out_bytes":4096,"dtype":"fp16","preds":[]},
+    {"op_id":"op1","op_type":"ACT","ops":30000,"in_bytes":4096,"w_bytes":0,"out_bytes":4096,"dtype":"fp16","preds":["op0"]},
+    {"op_id":"op2","op_type":"GEMM","ops":180000,"in_bytes":4096,"w_bytes":16384,"out_bytes":4096,"dtype":"fp16","preds":["op1"]},
+    {"op_id":"op3","op_type":"NORM","ops":40000,"in_bytes":4096,"w_bytes":1024,"out_bytes":4096,"dtype":"fp16","preds":["op2"]},
+    {"op_id":"op4","op_type":"MATMUL","ops":200000,"in_bytes":4096,"w_bytes":16384,"out_bytes":4096,"dtype":"fp16","preds":["op3"]}
+  ]
+}
