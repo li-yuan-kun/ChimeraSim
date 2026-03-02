@@ -1,0 +1,18 @@
+{
+  "acim": {
+    "num_tiles": 4,
+    "ops_per_ns": 5000,
+    "shots_per_ns": 8,
+    "ops_per_shot": 2048
+  },
+  "digital": {
+    "num_tiles": 4,
+    "ops_per_ns": 8000,
+    "shots_per_ns": 1,
+    "ops_per_shot": 1
+  },
+  "nop": {
+    "bandwidth_bytes_per_ns": 32,
+    "latency_ns": 80
+  }
+}

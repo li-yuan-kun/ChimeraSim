@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from collections import deque
-from dataclasses import dataclass
 
 
-@dataclass(slots=True)
+@dataclass
 class OpNode:
     op_id: str
     op_type: str
@@ -12,38 +12,34 @@ class OpNode:
     in_bytes: int
     w_bytes: int
     out_bytes: int
-    dtype: str
-    preds: list[str]
-    succs: list[str]
+    dtype: str = "fp16"
+    preds: list[str] = field(default_factory=list)
+    succs: list[str] = field(default_factory=list)
 
 
 class WorkloadGraph:
     def __init__(self, ops: list[OpNode]) -> None:
-        self._ops = {op.op_id: op for op in ops}
+        self.nodes: dict[str, OpNode] = {op.op_id: op for op in ops}
+        for op in self.nodes.values():
+            op.succs = []
+        for op in self.nodes.values():
+            for pred in op.preds:
+                self.nodes[pred].succs.append(op.op_id)
 
     def topological(self) -> list[str]:
-        indegree: dict[str, int] = {op_id: 0 for op_id in self._ops}
-        for op in self._ops.values():
-            for succ in op.succs:
-                if succ not in self._ops:
-                    raise KeyError(f"Unknown successor node: {succ}")
-                indegree[succ] += 1
-
-        queue = deque(op_id for op_id, degree in indegree.items() if degree == 0)
+        indeg = {op_id: len(op.preds) for op_id, op in self.nodes.items()}
+        q = deque([op_id for op_id, v in indeg.items() if v == 0])
         order: list[str] = []
-
-        while queue:
-            op_id = queue.popleft()
-            order.append(op_id)
-            for succ in self._ops[op_id].succs:
-                indegree[succ] -= 1
-                if indegree[succ] == 0:
-                    queue.append(succ)
-
-        if len(order) != len(self._ops):
-            raise ValueError("Workload graph contains cycles")
-
+        while q:
+            cur = q.popleft()
+            order.append(cur)
+            for nxt in self.nodes[cur].succs:
+                indeg[nxt] -= 1
+                if indeg[nxt] == 0:
+                    q.append(nxt)
+        if len(order) != len(self.nodes):
+            raise ValueError("Graph contains a cycle")
         return order
 
     def get_op(self, op_id: str) -> OpNode:
-        return self._ops[op_id]
+        return self.nodes[op_id]
